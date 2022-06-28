@@ -1,15 +1,22 @@
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { RootState, AppThunk } from '../../app/store';
-import { fetchCount } from './counterAPI';
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+
+import { RootState, AppThunk } from "store";
+import { fetchCount } from "apis";
+
+enum CounterStatus {
+  IDLE = "idle",
+  LOADING = "loading",
+  FAILED = "failed",
+}
 
 export interface CounterState {
   value: number;
-  status: 'idle' | 'loading' | 'failed';
+  status: CounterStatus;
 }
 
 const initialState: CounterState = {
   value: 0,
-  status: 'idle',
+  status: CounterStatus.IDLE,
 };
 
 // The function below is called a thunk and allows us to perform async logic. It
@@ -18,7 +25,7 @@ const initialState: CounterState = {
 // code can then be executed and other actions can be dispatched. Thunks are
 // typically used to make async requests.
 export const incrementAsync = createAsyncThunk(
-  'counter/fetchCount',
+  "counter/fetchCount",
   async (amount: number) => {
     const response = await fetchCount(amount);
     // The value we return becomes the `fulfilled` action payload
@@ -27,7 +34,7 @@ export const incrementAsync = createAsyncThunk(
 );
 
 export const counterSlice = createSlice({
-  name: 'counter',
+  name: "counter",
   initialState,
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
@@ -51,14 +58,14 @@ export const counterSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(incrementAsync.pending, (state) => {
-        state.status = 'loading';
+        state.status = CounterStatus.LOADING;
       })
       .addCase(incrementAsync.fulfilled, (state, action) => {
-        state.status = 'idle';
+        state.status = CounterStatus.IDLE;
         state.value += action.payload;
       })
       .addCase(incrementAsync.rejected, (state) => {
-        state.status = 'failed';
+        state.status = CounterStatus.FAILED;
       });
   },
 });
@@ -81,4 +88,4 @@ export const incrementIfOdd =
     }
   };
 
-export default counterSlice.reducer;
+export const counterReducer = counterSlice.reducer;
